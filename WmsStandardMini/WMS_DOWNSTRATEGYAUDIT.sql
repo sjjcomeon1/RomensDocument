@@ -1,6 +1,6 @@
 
 GO
-
+123
 /****** Object:  StoredProcedure [dbo].[WMS_DOWNSTRATEGYAUDIT]    Script Date: 2020/11/18 10:31:03 ******/
 SET ANSI_NULLS ON
 GO
@@ -20,25 +20,25 @@ CREATE Proc [dbo].[WMS_DOWNSTRATEGYAUDIT]
 
  Begin
   declare @info    varchar(500);
- declare @iswhole bit; --1ÊÇÕû»õ0ÊÇÉ¢
+ declare @iswhole bit; --1æ˜¯æ•´è´§0æ˜¯æ•£
  declare @num     int;
  declare @count   int;
  declare @hw varchar(100);
  declare @xh varchar(100);
-  --Êı¾İÓĞĞ§¼ì²â
-  select @info = case when isnull(a.isauditing, 0) = 1 then 'µ±Ç°µ¥¾İÒÑÉóºË,²»ÔÊĞíÖØ¸´ÉóºË£¡' end from wms_downstrategy a where a.guid = @billguid;
+  --æ•°æ®æœ‰æ•ˆæ£€æµ‹
+  select @info = case when isnull(a.isauditing, 0) = 1 then 'å½“å‰å•æ®å·²å®¡æ ¸,ä¸å…è®¸é‡å¤å®¡æ ¸ï¼' end from wms_downstrategy a where a.guid = @billguid;
   if IsNull(@info,'')<> ''
   Begin
     set @ReturnMsg   = @info;
     set @ReturnValue = -1;
     return;
   End;
-    --¼ì²âÊÇ·ñÓĞÃ÷Ï¸Êı¾İ
+    --æ£€æµ‹æ˜¯å¦æœ‰æ˜ç»†æ•°æ®
   Set @count = 0;
   Select @count =COUNT(1) FROM wms_downstrategydetail  WHERE MAINGUID = @billguid;
   If @count = 0 
   Begin
-	set @ReturnMsg = 'Ã»ÓĞÃ÷Ï¸Êı¾İ£¬²»ÔÊĞíÉóºË';
+	set @ReturnMsg = 'æ²¡æœ‰æ˜ç»†æ•°æ®ï¼Œä¸å…è®¸å®¡æ ¸';
 	set @ReturnValue = -1;
 	return;
   End
@@ -50,17 +50,17 @@ CREATE Proc [dbo].[WMS_DOWNSTRATEGYAUDIT]
   End	
   IF IsNull(@hw,'')<>''
   BEGIN
-	 select top 1 @ReturnMsg = 'Ã÷Ï¸ÖĞĞòºÅ:'+ @xh + '»õÎ»:'+t2.code+',ÔÚ³ö¿â²ßÂÔID:'+t1.code+'ÖĞÒÑ¾­¶¨Òå¹ı,ÉóºËÊ§°Ü£¡' from WMS_DOWNSTRATEGYDETAIL t inner join WMS_DOWNSTRATEGY t1 on t.mainguid = t1.guid left join GOODSPLACE t2 on t.goodsplaceguid = t2.guid  where t.goodsplaceguid = @hw and t.mainguid <> @billguid;
+	 select top 1 @ReturnMsg = 'æ˜ç»†ä¸­åºå·:'+ @xh + 'è´§ä½:'+t2.code+',åœ¨å‡ºåº“ç­–ç•¥ID:'+t1.code+'ä¸­å·²ç»å®šä¹‰è¿‡,å®¡æ ¸å¤±è´¥ï¼' from WMS_DOWNSTRATEGYDETAIL t inner join WMS_DOWNSTRATEGY t1 on t.mainguid = t1.guid left join GOODSPLACE t2 on t.goodsplaceguid = t2.guid  where t.goodsplaceguid = @hw and t.mainguid <> @billguid;
      Set @ReturnValue = -1;
      Return;
   END;
 
   Begin Tran
-    --¸üĞÂÉóºË×´Ì¬ ÉóºËÈË ÉóºËÊ±¼ä
+    --æ›´æ–°å®¡æ ¸çŠ¶æ€ å®¡æ ¸äºº å®¡æ ¸æ—¶é—´
     UPDATE wms_downstrategy SET IsAuditing = 1,AuditingDate = convert(varchar(10),getdate(),23),AuditingGuid = @OperatorGuid WHERE Guid = @BillGuid;
 	If @@Error<>0 
 	Begin
-	 Set @ReturnMsg = 'ÉóºË·¢ÉúÒì³£'
+	 Set @ReturnMsg = 'å®¡æ ¸å‘ç”Ÿå¼‚å¸¸'
 	 Goto SQLErr1
 	End
   Commit Tran
